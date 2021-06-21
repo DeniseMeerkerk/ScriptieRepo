@@ -14,8 +14,8 @@ import pandas as pd
 #import imageio
 #%%
 dir = os.path.dirname(__file__)
-dir_img = dir.replace('Repo', 'NLMCXR_png')
-dir = dir.replace('Repo', '')
+dir_img = dir.replace('ScriptieRepo', 'DATA/NLMCXR_png')
+dir = dir.replace('ScriptieRepo', 'DATA')
 filename = os.path.join(dir, 'Data_with_tags.npy')
 
 #%% annotations
