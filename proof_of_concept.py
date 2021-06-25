@@ -8,8 +8,8 @@ Created on Fri May 28 10:15:26 2021
 import sys
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '/home/denise/Documents/Vakken/Scriptie/Repo/object_relation_transformer')
-from object_relation_transformer.misc import resnet
-from object_relation_transformer.scripts import prepro_feats ####
+#from object_relation_transformer.misc import resnet
+#from object_relation_transformer.scripts import prepro_feats ####
 import numpy as np
 import pandas as pd
 
