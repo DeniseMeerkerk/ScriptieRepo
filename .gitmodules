@@ -1,0 +1,3 @@
+[submodule "object_relation_transformer"]
+	path = object_relation_transformer
+	url = https://github.com/yahoo/object_relation_transformer
