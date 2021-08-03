@@ -23,7 +23,7 @@ data = np.load(filename, allow_pickle=True)
 datad = data.item() #dictionary
 
 #%% images
-onlyfiles = [f for f in os.listdir(dir_img) if os.path.isfile(os.path.join(dir_img, f)) and 'png' in f] #png files
+onlyfiles = [f for f in os.listdir(dir_img) if os.path.isfile(os.path.join(dir_img, f)) and 'png' in f and not '.npy' in f] #png files
 
 images = [plt.imread(dir_img + '/'+ f) for f in onlyfiles[:10]]
 #print(images.shape)

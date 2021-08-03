@@ -47,7 +47,7 @@ PATH = dir.replace('ScriptieRepo', 'DATA/NLMCXR_png')
 
 annotations = pd.read_csv(annotation_file)
 findings = annotations[["uid","findings"]]
-onlyfiles = [f for f in os.listdir(PATH) if os.path.isfile(os.path.join(PATH, f)) and 'png' in f] #png files
+onlyfiles = [f for f in os.listdir(PATH) if os.path.isfile(os.path.join(PATH, f)) and 'png' in f and '.npy' not in f] #png files
 
 images = [plt.imread(PATH + '/'+ f) for f in onlyfiles[:no_files]]
 #%%
