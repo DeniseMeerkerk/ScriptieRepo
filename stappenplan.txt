@@ -4,5 +4,7 @@ python ScriptieRepo/object_relation_transformer/scripts/prepro_labels.py --input
 conda deactivate
 conda activate scriptie2
 python ScriptieRepo/object_relation_transformer/scripts/prepro_ngrams.py --input_json DATA/subset2.json --dict_json DATA/subset2_out.json --output_pkl DATA/IUXRAY-train --split train
-python ScriptieRepo/object_relation_transformer/scripts/prepro_feats.py --input_json DATA/subset2.json --output_dir DATA/IUXRAYtalk --images_root $IMAGE_ROOT
-# 7. does not work yet: (ImportError: No module named torchvision.models)
+python ScriptieRepo/object_relation_transformer/scripts/prepro_feats.py --input_json DATA/subset2.json --output_dir DATA/IUXRAYtalk --images_root DATA --model_root ScriptieRepo/data/imagenet_weights
+
+
+
