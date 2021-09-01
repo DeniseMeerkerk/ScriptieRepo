@@ -5,6 +5,6 @@ conda deactivate
 conda activate scriptie2
 python ScriptieRepo/object_relation_transformer/scripts/prepro_ngrams.py --input_json DATA/subset2.json --dict_json DATA/subset2_out.json --output_pkl DATA/IUXRAY-train --split train
 python ScriptieRepo/object_relation_transformer/scripts/prepro_feats.py --input_json DATA/subset2.json --output_dir DATA/IUXRAYtalk --images_root DATA --model_root ScriptieRepo/data/imagenet_weights
-
-
+python ScriptieRepo/object_relation_transformer/scripts/make_bu_data.py --downloaded_feats DATA/bu_data --output_dir DATA/cocobu
+# 8) doet dingen, maar wat?
 
