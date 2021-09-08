@@ -7,4 +7,7 @@ python ScriptieRepo/object_relation_transformer/scripts/prepro_ngrams.py --input
 python ScriptieRepo/object_relation_transformer/scripts/prepro_feats.py --input_json DATA/subset2.json --output_dir DATA/IUXRAYtalk --images_root DATA --model_root ScriptieRepo/data/imagenet_weights
 python ScriptieRepo/object_relation_transformer/scripts/make_bu_data.py --downloaded_feats DATA/bu_data --output_dir DATA/cocobu
 # 8) doet dingen, maar wat?
-
+python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --input_json DATA/subset2.json --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
+# 10) coco werkt niet zomaar op onze plaatjes, vershil in getalletjes enzo
+python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --input_json DATA/subset2.json --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
+# stiekem aan het kijken naar: https://github.com/peteanderson80/bottom-up-attention
