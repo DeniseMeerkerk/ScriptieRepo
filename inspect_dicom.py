@@ -21,16 +21,15 @@ from tqdm import tqdm
 from matplotlib.patches import Rectangle
 
 #%%
-TRAIN_DIR = '/home/denise/Downloads/Dicom/train'
+TRAIN_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/train"
 #TEST_DIR = '../input/vinbigdata-chest-xray-abnormalities-detection/test'
 
-df_train = pd.read_csv('/home/denise/Downloads/Dicom'+"/train.csv")
+df_train = pd.read_csv("/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"+"/train.csv")
 print(df_train.shape)
 print(df_train.columns)
 df_train.head(20)
 
 print(df_train['image_id'][0])
-
 #%%
 
 def show_dcm_info(dataset):

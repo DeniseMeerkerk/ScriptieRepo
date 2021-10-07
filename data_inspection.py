@@ -60,4 +60,13 @@ print(probleem['only missing F'].value_counts())
 probleem.to_csv('probleem.csv')
 #kaggle code snippets?
 
+#%% which 'classes' are present?
+list =[] # create empty list
+for val in datad.values(): 
+  if val in list: 
+    continue 
+  else:
+    list.append(val)
 
+
+result = {x for l in list for x in l}
