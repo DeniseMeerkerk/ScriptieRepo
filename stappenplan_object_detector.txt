@@ -1,0 +1,2 @@
+# change the Makefile.config
+# opencv trouble: location: /home/denise/.local/lib/python2.7/site-packages
