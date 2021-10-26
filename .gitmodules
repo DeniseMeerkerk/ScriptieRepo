@@ -4,3 +4,6 @@
 [submodule "keras-yolo3"]
 	path = keras-yolo3
 	url = https://github.com/experiencor/keras-yolo3
+[submodule "other_keras-yolo3"]
+	path = other_keras-yolo3
+	url = https://github.com/qqwweee/keras-yolo3
