@@ -1,3 +1,6 @@
 [submodule "object_relation_transformer"]
 	path = object_relation_transformer
 	url = https://github.com/yahoo/object_relation_transformer
+[submodule "keras-yolo3"]
+	path = keras-yolo3
+	url = https://github.com/experiencor/keras-yolo3
