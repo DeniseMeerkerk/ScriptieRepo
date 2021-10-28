@@ -20,7 +20,8 @@ from os import walk
 
 #%% load things
 
-path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
+#path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
+path =  "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
 
 df_train = pd.read_csv(path+"/train.csv")
 f = []
@@ -75,7 +76,7 @@ def GenerateXML(fileName,file_name,temp,im_width,im_height):
     tree = gfg.ElementTree(root)
     
     dom = minidom.parseString(gfg.tostring(root))
-    print(dom.toprettyxml(indent='\t'))
+    #print(dom.toprettyxml(indent='\t'))
     
     with open (fileName, "wb") as files :
         tree.write(files,)
