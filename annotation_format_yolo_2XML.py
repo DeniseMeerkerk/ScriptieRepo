@@ -33,7 +33,7 @@ del dirnames, dirpath, filenames
 
 
 
-def GenerateXML(fileName,file_name,temp,im_width,im_height):
+def GenerateXML(fileName,file_name,temp,im_width,im_height,resize_factor=1):
     root = gfg.Element("XRAY")
     m1 = gfg.Element("filename")
     root.append (m1)
@@ -52,10 +52,10 @@ def GenerateXML(fileName,file_name,temp,im_width,im_height):
             continue
         
         else:
-            x_min = temp["x_min"].iloc[row]
-            y_min = temp["y_min"].iloc[row]
-            x_max = temp["x_max"].iloc[row]
-            y_max = temp["y_max"].iloc[row]
+            x_min = np.floor(temp["x_min"].iloc[row]/resize_factor)
+            y_min = np.floor(temp["y_min"].iloc[row]/resize_factor)
+            x_max = np.ceil(temp["x_max"].iloc[row]/resize_factor)
+            y_max = np.ceil(temp["y_max"].iloc[row]/resize_factor)
             m4 = gfg.Element("object")
             root.append (m4)
             
@@ -74,8 +74,8 @@ def GenerateXML(fileName,file_name,temp,im_width,im_height):
     
     tree = gfg.ElementTree(root)
     
-    dom = minidom.parseString(gfg.tostring(root))
-    print(dom.toprettyxml(indent='\t'))
+    #dom = minidom.parseString(gfg.tostring(root))
+    #print(dom.toprettyxml(indent='\t'))
     
     with open (fileName, "wb") as files :
         tree.write(files,)
@@ -87,6 +87,6 @@ if __name__ == "__main__":
         temp = df_train.loc[df_train["image_id"]==image_id]
         
         dataset = pydicom.dcmread(path + '/train/'+ file_name)
-        im_width = int(dataset.Rows)
-        im_height =int(dataset.Columns)
+        im_width = int(dataset.Columns)
+        im_height = int(dataset.Rows)
         GenerateXML(path+"/anno_xml/"+image_id+".xml",file_name,temp,im_width,im_height)

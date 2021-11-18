@@ -14,10 +14,10 @@ import pandas as pd
 import os
 from matplotlib import cm
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 #import cv2
 import pydicom
-from tqdm import tqdm
+#from tqdm import tqdm
 from matplotlib.patches import Rectangle
 
 #%%
