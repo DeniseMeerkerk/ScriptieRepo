@@ -20,7 +20,8 @@ from os import walk
 
 #%% load things
 
-path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
+#path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
+path =  "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
 
 df_train = pd.read_csv(path+"/train.csv")
 f = []
