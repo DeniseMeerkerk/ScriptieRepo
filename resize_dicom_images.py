@@ -26,10 +26,18 @@ from annotation_format_yolo_2XML import GenerateXML
 
 #%% load images
 
-TRAIN_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/train"
-ANNO_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/anno_xml"
-#TEST_DIR = '../input/vinbigdata-chest-xray-abnormalities-detection/test'
-PNG_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train/"
+#TRAIN_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/train"
+TRAIN_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train"
+
+#ANNO_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/anno_xml"
+ANNO_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/anno_xml"
+
+#PNG_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train/"
+PNG_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train_subset_png"
+
+#path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
+path = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
+    
 
 #df_train = pd.read_csv("/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"+"/train.csv")
 #print(df_train.shape)
@@ -72,7 +80,6 @@ for file_name in os.listdir(TRAIN_DIR):
     # save as png
     #img = Image.fromarray(img)
     #img.save(PNG_DIR+file_name[:-5]+'png')
-    path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
     df_train = pd.read_csv(path+"/train.csv")
     image_id = file_name[:-6]
     temp = df_train.loc[df_train["image_id"]==image_id]
