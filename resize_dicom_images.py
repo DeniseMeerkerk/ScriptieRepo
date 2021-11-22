@@ -33,7 +33,7 @@ TRAIN_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train"
 ANNO_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/anno_xml"
 
 #PNG_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train/"
-PNG_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train_subset_png"
+PNG_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train_png/"
 
 #path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
 path = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
