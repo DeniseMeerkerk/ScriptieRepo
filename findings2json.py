@@ -9,13 +9,11 @@ Adjust the json files of the IU XRAY data set to be like coco. This new file is
 needed as input for code from herade paper.
 """
 #%% packages
-import pandas as pd
 import os
 import json
 
 #%% adjust json file to right directory (only test for now)
 def obtain_json_object(json_folder, json_file):
-    print(json_folder+json_file)
     a_file = open(json_folder+json_file, "r")
     json_object = json.load(a_file)
     a_file.close()
@@ -56,12 +54,18 @@ def convert_json_coco_style(subset,json_folder,output_filename,image_folder, ser
         tokens = image['caption'].split(' ') #->tokenize
         tokens = [token.lower().replace('.','') for token in tokens]
         #tokens =[token for token in tokens]
+        
+        if "train" in output_filename:
+            split = 'train'
+        elif "test" in output_filename:
+            split = 'test'
+            
         new_IU_json['images'].append({
             'filepath': image_folder,
             'sentids': [int(image['report_id'].split('CXR')[-1])],
             'filename': image['images'][0].split("/",-1)[-1],
             'imgid': image['report_id'],
-            'split': 'train',
+            'split': split,
             'sentences': [{
                 'tokens': tokens,
                 'raw': image['caption'],
@@ -74,7 +78,7 @@ def convert_json_coco_style(subset,json_folder,output_filename,image_folder, ser
     return
     
 def main():
-    server = False # adjust accordingly
+    server = True # adjust accordingly
 
     #get paths depending on whether working on server or local.
     if server:
@@ -87,7 +91,6 @@ def main():
         image_folder = '/home/denise/Documents/Vakken/Scriptie/DATA/NLMCXR_png'
     # adjust train and test json file
     json_files = ["/test.json","/train.json"]
-    #print(json_folder)
     for json_file in json_files:
         json_object = obtain_json_object(json_folder, json_file)
         json_object = correct_image_path_json(json_folder, json_file, json_object,server=server,image_folder=image_folder)
