@@ -1,4 +1,5 @@
 conda activate scriptie
+pyton findings2json.py
 cd ~/Documents/Vakken/Scriptie
 python ScriptieRepo/object_relation_transformer/scripts/prepro_labels.py --input_json DATA/subset2.json --output_json DATA/subset2_out.json --output_h5 DATA/subset2_out --word_count_threshold 1
 conda deactivate
