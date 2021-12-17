@@ -1,26 +1,43 @@
+#yolojob
+python train.py -c config.json
+#check
+
+# Get bounding boxes...
+
 conda activate scriptie
 pyton findings2json.py
-cd ~/Documents/Vakken/Scriptie
-python ScriptieRepo/object_relation_transformer/scripts/prepro_labels.py --input_json DATA/subset2.json --output_json DATA/subset2_out.json --output_h5 DATA/subset2_out --word_count_threshold 1
+#check
+
+#prepro_labels_job
 conda deactivate
 conda activate scriptie2
-python ScriptieRepo/object_relation_transformer/scripts/prepro_ngrams.py --input_json DATA/subset2.json --dict_json DATA/subset2_out.json --output_pkl DATA/IUXRAY-train --split train
+cd ~/master/ScriptieRepo
+python object_relation_transformer/scripts/prepro_labels.py --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json --output_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out.json --output_h5 /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/train_out --word_count_threshold 5
+# check
+
+#prepro_ngrams_job
+python object_relation_transformer/scripts/prepro_ngrams.py --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json --dict_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out.json --output_pkl /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/train_out --split train
+# check
+
+#
 python ScriptieRepo/object_relation_transformer/scripts/prepro_feats.py --input_json DATA/subset2.json --output_dir DATA/IUXRAYtalk --images_root DATA --model_root ScriptieRepo/data/imagenet_weights
+#
+
+#
 python ScriptieRepo/object_relation_transformer/scripts/make_bu_data.py --downloaded_feats DATA/bu_data --output_dir DATA/cocobu
-# 8) doet dingen, maar wat?
+# doet dingen, maar wat?
+
 python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --input_json DATA/subset2.json --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
 # 10) coco werkt niet zomaar op onze plaatjes, vershil in getalletjes enzo
+
 python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --input_json DATA/subset2.json --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
-# stiekem aan het kijken naar: https://github.com/peteanderson80/bottom-up-attention
+#
 
 
-#YOLO
-python train.py -c config.json
-#YOLO
 
 
 #server#
-ssh dmeerkerk@cn13.science.ru.nl
+ssh dmeerkerk@cn99.science.ru.nl
 
 /home/dmeerkerk/miniconda3/envs/scriptie3/bin/python
 

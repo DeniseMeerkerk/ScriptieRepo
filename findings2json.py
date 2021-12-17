@@ -59,11 +59,17 @@ def convert_json_coco_style(subset,json_folder,output_filename,image_folder, ser
             split = 'train'
         elif "test" in output_filename:
             split = 'test'
+        if server:
+            filename = image['images'][0].split("/",-1)[-1]
+            filename = filename[3:]
+            filename = filename.replace('.png','.dcm.png')
+        else:
+            filename = image['images'][0].split("/",-1)[-1]
             
         new_IU_json['images'].append({
             'filepath': image_folder,
             'sentids': [int(image['report_id'].split('CXR')[-1])],
-            'filename': image['images'][0].split("/",-1)[-1],
+            'filename': filename,
             'imgid': image['report_id'],
             'split': split,
             'sentences': [{
@@ -84,7 +90,7 @@ def main():
     if server:
         annotation_file = "/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/indiana_reports.csv"
         json_folder = "/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json"
-        image_folder = "/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized"
+        image_folder = "/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized/"
     else:
         annotation_file =  '/home/denise/Documents/Vakken/Scriptie/DATA/indiana_reports.csv'
         json_folder = '/home/denise/Documents/Vakken/Scriptie/DATA'
