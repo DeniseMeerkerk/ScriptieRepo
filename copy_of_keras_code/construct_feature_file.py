@@ -30,13 +30,15 @@ argparser.add_argument(
     '-w',
     '--weights',
     help='path to weights file',
-    default= '/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/yolov3.weights')
+    #default= '/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/yolov3.weights')
+    default= 'home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5')
 
 argparser.add_argument(
     '-i',
     '--image_folder',
     help='path to image files folder',
-    default= '/home/denise/Pictures/katfotos/')
+    #default= '/home/denise/Pictures/katfotos/')
+    default= '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30')
 #%% crop image
 def crop_image(image,boxes,labels, obj_thresh):
     cropped_images, used_boxes = [], []
@@ -108,37 +110,43 @@ def get_list_images(images_path):
     return images
 
 #%%
+#args = argparser.parse_args()
 
 
 def _main_(args):
     weights_path = args.weights
     image_folder   = args.image_folder
     images_path = get_list_images(image_folder)
-
+    
     # set some parameters
     net_h, net_w = 416, 416
     obj_thresh, nms_thresh = 0.5, 0.45
     anchors = [[116,90,  156,198,  373,326],  [30,61, 62,45,  59,119], [10,13,  16,30,  33,23]]
-    labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
-              "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
-              "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", \
-              "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", \
-              "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", \
-              "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", \
-              "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", \
-              "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", \
-              "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", \
-              "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
-
+    # labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
+    #           "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
+    #           "bird", "cat", "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", \
+    #           "backpack", "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", \
+    #           "sports ball", "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", \
+    #           "tennis racket", "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", \
+    #           "apple", "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake", \
+    #           "chair", "sofa", "pottedplant", "bed", "diningtable", "toilet", "tvmonitor", "laptop", "mouse", \
+    #           "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink", "refrigerator", \
+    #           "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"]
+    labels = ["Aortic enlargement","Atelectasis","Calcification","Cardiomegaly",
+              "Consolidation","ILD","Infiltration","Lung Opacity","Nodule/Mass",
+              "Other lesion","Pleural effusion","Pleural thickening","Pneumothorax",
+              "Pulmonary fibrosis"]
+    
     # make the yolov3 model to predict 80 classes on COCO #%% load model
     yolov3 = make_yolov3_model()
-
+    
     # load the weights trained on COCO into the model
     weight_reader = WeightReader(weights_path)
     weight_reader.load_weights(yolov3)
-
+    
     # preprocess the image
     for image_path in images_path:
+        print(image_path)
         image = cv2.imread(image_folder + image_path)
         image_h, image_w, _ = image.shape
         new_image = preprocess_input(image, net_h, net_w)
@@ -168,6 +176,7 @@ def _main_(args):
             #image_h, image_w, _ = cropped_image.shape
             cropped_new_images.append(preprocess_input(cropped_image, net_h, net_w))
         features_out = get_features_per_box(yolov3,cropped_new_images)
+        save_like_downloaded_feats(image_path[:-4], image_w, image_h, len(used_boxes),used_boxes,features_out)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
@@ -175,6 +184,7 @@ if __name__ == '__main__':
 
 
 
-#TODO: loop through all images
+
+#TODO: only png works???
 
 

@@ -275,9 +275,16 @@ def preprocess_input(image, net_h, net_w):
     # embed the image into the standard letter box
     new_image = np.ones((net_h, net_w, 3)) * 0.5
     try:
-        new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2)), int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2))-1, :] = resized
+        new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2)), int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2)), :] = resized 
     except:
-        new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2)), int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2)), :] = resized
+        try:
+            new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2)), int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2))-1, :] = resized
+        except:
+                try:
+                    new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2))-1, int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2)), :] = resized
+                except:
+                        new_image[int((net_h-new_h)//2):int(np.ceil((net_h+new_h)//2))-1, int((net_w-new_w)//2):int(np.ceil((net_w+new_w)//2))-1, :] = resized
+                    
 
             
     new_image = np.expand_dims(new_image, 0)
