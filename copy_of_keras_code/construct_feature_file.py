@@ -31,14 +31,14 @@ argparser.add_argument(
     '--weights',
     help='path to weights file',
     #default= '/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/yolov3.weights')
-    default= 'home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5')
+    default= '/home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5')
 
 argparser.add_argument(
     '-i',
     '--image_folder',
     help='path to image files folder',
     #default= '/home/denise/Pictures/katfotos/')
-    default= '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30')
+    default= '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30/')
 #%% crop image
 def crop_image(image,boxes,labels, obj_thresh):
     cropped_images, used_boxes = [], []
@@ -95,6 +95,7 @@ def save_like_downloaded_feats(image_id,image_w,image_h,num_boxes,used_boxes,fea
         file.write(str(image_id) + "\t" + str(image_w) + "\t" +
                    str(image_h) + "\t" + str(num_boxes) + "\t" +
                    str(used_boxes_encoded)[2:-1] + "\t" + str(features_out_encoded)[2:-1] + "\n" )
+    print('saved features of image ', image_id, 'to file')
     return
 #%% encode to base64
 def encode_base64(list_array):
@@ -114,6 +115,7 @@ def get_list_images(images_path):
 
 
 def _main_(args):
+    print('starting')
     weights_path = args.weights
     image_folder   = args.image_folder
     images_path = get_list_images(image_folder)
@@ -146,9 +148,14 @@ def _main_(args):
     
     # preprocess the image
     for image_path in images_path:
-        print(image_path)
+        print(image_folder + image_path)
         image = cv2.imread(image_folder + image_path)
-        image_h, image_w, _ = image.shape
+        try:
+            image_h, image_w, _ = image.shape
+        except:
+            print(image_path + " did not contain shape???")
+            print(image)
+            break
         new_image = preprocess_input(image, net_h, net_w)
     
         # run the prediction
