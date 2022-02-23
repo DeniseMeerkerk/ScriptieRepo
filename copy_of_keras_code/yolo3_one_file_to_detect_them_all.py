@@ -260,7 +260,7 @@ def make_yolov3_model():
 
 def preprocess_input(image, net_h, net_w):
     new_h, new_w, _ = image.shape
-
+    print(image.shape)
     # determine the new size of the image
     if (float(net_w)/new_w) < (float(net_h)/new_h):
         new_h = (new_h * net_w)/new_w
@@ -355,22 +355,27 @@ def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
 def do_nms(boxes, nms_thresh):
     if len(boxes) > 0:
         nb_class = len(boxes[0].classes)
+        print("nb_class done")
     else:
         return
         
     for c in range(nb_class):
+        #print("c", c)
         sorted_indices = np.argsort([-box.classes[c] for box in boxes])
-
+        #print("sorting done")
         for i in range(len(sorted_indices)):
+            #print("i",i)
             index_i = sorted_indices[i]
 
             if boxes[index_i].classes[c] == 0: continue
 
             for j in range(i+1, len(sorted_indices)):
+                #print("j",j)
                 index_j = sorted_indices[j]
 
                 if bbox_iou(boxes[index_i], boxes[index_j]) >= nms_thresh:
                     boxes[index_j].classes[c] = 0
+    print('do_nms done')
                     
 def draw_boxes(image, boxes, labels, obj_thresh):
     for box in boxes:

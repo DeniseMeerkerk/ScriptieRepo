@@ -31,14 +31,18 @@ argparser.add_argument(
     '--weights',
     help='path to weights file',
     #default= '/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/yolov3.weights')
-    default= '/home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5')
+    #default= '/home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5')
+    default= '/home/denise/Downloads/XRAY_vinbig_png15000.h5')
 
 argparser.add_argument(
     '-i',
     '--image_folder',
     help='path to image files folder',
     #default= '/home/denise/Pictures/katfotos/')
-    default= '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30/')
+    #default= '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30/')
+    #default= '/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train2/')
+    default= '/home/denise/Downloads/subset30/')
+
 #%% crop image
 def crop_image(image,boxes,labels, obj_thresh):
     cropped_images, used_boxes = [], []
@@ -122,7 +126,7 @@ def _main_(args):
     
     # set some parameters
     net_h, net_w = 416, 416
-    obj_thresh, nms_thresh = 0.5, 0.45
+    obj_thresh, nms_thresh = 0.75, 0.45
     anchors = [[116,90,  156,198,  373,326],  [30,61, 62,45,  59,119], [10,13,  16,30,  33,23]]
     # labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
     #           "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
@@ -139,12 +143,13 @@ def _main_(args):
               "Other lesion","Pleural effusion","Pleural thickening","Pneumothorax",
               "Pulmonary fibrosis"]
     
-    # make the yolov3 model to predict 80 classes on COCO #%% load model
-    yolov3 = make_yolov3_model()
+    # make the yolov3 model to predict 80 classes on COCO #%% load model'
+    yolov3 = load_model(weights_path)
+    #yolov3 = make_yolov3_model()
     
     # load the weights trained on COCO into the model
-    weight_reader = WeightReader(weights_path)
-    weight_reader.load_weights(yolov3)
+    #weight_reader = WeightReader(weights_path)
+    #weight_reader.load_weights(yolov3)
     
     # preprocess the image
     for image_path in images_path:
@@ -152,38 +157,48 @@ def _main_(args):
         image = cv2.imread(image_folder + image_path)
         try:
             image_h, image_w, _ = image.shape
+            print(image_h, image_w)
         except:
             print(image_path + " did not contain shape???")
             print(image)
-            break
+            #break
         new_image = preprocess_input(image, net_h, net_w)
-    
+        print('preprocess done')
+        
+        
         # run the prediction
         yolos = yolov3.predict(new_image)
+        print('prediction done')
         boxes = []
-    
+        
         for i in range(len(yolos)): #%% get boxes
             # decode the output of the network
             boxes += decode_netout(yolos[i][0], anchors[i], obj_thresh, nms_thresh, net_h, net_w)
-    
+        print('box decode done', len(boxes))
         # correct the sizes of the bounding boxes
         correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w)
-    
+        print('correct size done')
         # suppress non-maximal boxes
-        do_nms(boxes, nms_thresh)     
-    
+        do_nms(boxes, nms_thresh)   
+        print('box overlap done')
+        
         # draw bounding boxes on the image using labels
         #draw_boxes(image, boxes, labels, obj_thresh)
         cropped_images, used_boxes = crop_image(image,boxes,labels, obj_thresh)
-     
+        print('cropped done')
         # write the image with bounding boxes to file
         #cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], (image).astype('uint8')) 
         cropped_new_images = []
         for cropped_image in cropped_images:
-            #image_h, image_w, _ = cropped_image.shape
-            cropped_new_images.append(preprocess_input(cropped_image, net_h, net_w))
+            if 0 in cropped_image.shape:
+                continue
+            else:
+                cropped_new_images.append(preprocess_input(cropped_image, net_h, net_w))
+        print('appending images done')
         features_out = get_features_per_box(yolov3,cropped_new_images)
+        print('get features done')
         save_like_downloaded_feats(image_path[:-4], image_w, image_h, len(used_boxes),used_boxes,features_out)
+        print('saving done \n')
 
 if __name__ == '__main__':
     args = argparser.parse_args()
@@ -193,5 +208,16 @@ if __name__ == '__main__':
 
 
 #TODO: only png works???
+
+#%% look into bounding box distribution
+'''
+for n, box in enumerate(boxes):
+    box.get_score()
+    if box.score == 0:
+        continue
+    else:
+        print(n, box.score)
+'''
+    
 
 

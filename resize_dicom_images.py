@@ -25,18 +25,18 @@ import matplotlib
 from annotation_format_yolo_2XML import GenerateXML
 
 #%% load images
+server = False
+if server:
+    TRAIN_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train"
+    ANNO_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/anno_xml"
+    PNG_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train_png/"
+    path = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
+else:
+    TRAIN_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/train"
+    ANNO_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/anno_xml"
+    PNG_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train2/"
+    path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
 
-#TRAIN_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/train"
-TRAIN_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train"
-
-#ANNO_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom/anno_xml"
-ANNO_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/anno_xml"
-
-#PNG_DIR = "/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train/"
-PNG_DIR = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData/train_png/"
-
-#path = "/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"
-path = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
     
 
 #df_train = pd.read_csv("/home/denise/Documents/Vakken/Scriptie/DATA2/Dicom"+"/train.csv")
@@ -63,7 +63,7 @@ path = "/ceph/csedu-scratch/project/dmeerkerk/VinBigData"
 
 #%% resize images
 for file_name in os.listdir(TRAIN_DIR):
-    resize_factor = 7
+    resize_factor = 4
     print(file_name)
     if file_name == "no_findings":
         print("whoooops I'm a folder")

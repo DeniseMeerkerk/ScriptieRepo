@@ -125,8 +125,8 @@ def _main_(args):
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser(description='Predict with a trained yolo model')
-    argparser.add_argument('-c', '--conf', help='path to configuration file')
-    argparser.add_argument('-i', '--input', help='path to an image, a directory of images, a video, or webcam')    
+    argparser.add_argument('-c', '--conf',default='/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/keras-yolo3/config.json' , help='path to configuration file')
+    argparser.add_argument('-i', '--input', default= '/home/denise/Downloads/subset30/',help='path to an image, a directory of images, a video, or webcam')    
     argparser.add_argument('-o', '--output', default='output/', help='path to output directory')   
     
     args = argparser.parse_args()
