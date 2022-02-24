@@ -12,7 +12,8 @@ import os
 import numpy as np
 from keras.layers import Conv2D, Input, BatchNormalization, LeakyReLU, ZeroPadding2D, UpSampling2D
 from keras.layers.merge import add, concatenate
-from keras.models import Model
+from keras.models import Model, load_model
+
 import struct
 import cv2
 import tensorflow as tf
@@ -126,7 +127,7 @@ def _main_(args):
     
     # set some parameters
     net_h, net_w = 416, 416
-    obj_thresh, nms_thresh = 0.75, 0.45
+    obj_thresh, nms_thresh = 0.5, 0.45
     anchors = [[116,90,  156,198,  373,326],  [30,61, 62,45,  59,119], [10,13,  16,30,  33,23]]
     # labels = ["person", "bicycle", "car", "motorbike", "aeroplane", "bus", "train", "truck", \
     #           "boat", "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", \
@@ -212,11 +213,8 @@ if __name__ == '__main__':
 #%% look into bounding box distribution
 '''
 for n, box in enumerate(boxes):
-    box.get_score()
-    if box.score == 0:
-        continue
-    else:
-        print(n, box.score)
+    if np.max(box.classes) > 0:
+        print(n, np.max(box.classes))
 '''
     
 
