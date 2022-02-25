@@ -23,9 +23,35 @@ python object_relation_transformer/scripts/prepro_ngrams.py --input_json /ceph/c
 python prepro_feats.py --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/prepro_output --model_root /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/imagenet_weights
 #check (maar 
 
-#
-python ScriptieRepo/object_relation_transformer/scripts/make_bu_data.py --downloaded_feats DATA/bu_data --output_dir DATA/cocobu
-# hoe krijg ik feats?
+# construct_feature_file_job
+echo "activate env"
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate scriptie3
+cd ~/master/ScriptieRepo/keras-yolo3/
+echo "start script construct_feature_file.py"
+python construct_feature_file.py -w /home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5 -i /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized/
+# -i /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30/ 
+
+
+# bu_data_job
+echo "activate env"
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate scriptie3
+rm -r /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_ou*
+cd ~/master/ScriptieRepo/object_relation_transformer/scripts
+echo "start script"
+python make_bu_data.py --downloaded_feats ~/master/ScriptieRepo/keras-yolo3/ --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out
+# change infile variable in the script to use on all images.
+
+# relative_coords_job
+echo "activate env"
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate scriptie3
+rm -r /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_ou*
+cd ~/master/ScriptieRepo/object_relation_transformer/scripts
+echo "start script"
+python prepro_bbox_relative_coords.py --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json --image_root --input_box_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_box/ --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_rel/
+
 
 python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json
  --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
