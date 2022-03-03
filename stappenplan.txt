@@ -31,6 +31,7 @@ cd ~/master/ScriptieRepo/keras-yolo3/
 echo "start script construct_feature_file.py"
 python construct_feature_file.py -w /home/dmeerkerk/master/ScriptieRepo/keras-yolo3/XRAY_vinbig_png15000.h5 -i /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized/
 # -i /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/subset30/ 
+#check
 
 
 # bu_data_job
@@ -40,8 +41,8 @@ conda activate scriptie3
 rm -r /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_ou*
 cd ~/master/ScriptieRepo/object_relation_transformer/scripts
 echo "start script"
-python make_bu_data.py --downloaded_feats ~/master/ScriptieRepo/keras-yolo3/ --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out
-# change infile variable in the script to use on all images.
+python make_bu_data.py --downloaded_feats ~/master/ScriptieRepo/keras-yolo3/ --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out --tsv_file constructed_yolo_feats.tsv
+#
 
 # relative_coords_job
 echo "activate env"
@@ -51,13 +52,7 @@ rm -r /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_ou*
 cd ~/master/ScriptieRepo/object_relation_transformer/scripts
 echo "start script"
 python prepro_bbox_relative_coords.py --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json --image_root --input_box_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_box/ --output_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_rel/
-
-
-python ScriptieRepo/object_relation_transformer/scripts/prepro_bbox_relative_coords.py --/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json
- --input_box_dir DATA/cocobu_box --output_dir DATA/cocobu_box_relative --image_root DATA
-# 30) coco werkt niet zomaar op onze plaatjes, verschil in getalletjes enzo
-
-
+#
 
 
 
@@ -66,11 +61,11 @@ python train.py
 --id relation_transformerXRAY_bu_rl 
 --caption_model relation_transformer 
 --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco.json
---input_fc_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/prepro_output_fc 
---input_att_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/prepro_output_att 
+--input_fc_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_fc 
+--input_att_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_att 
 --input_label_h5 data/train_out_label.h5  
---input_box_dir data/cocobu_box 			#output make_bu_data.py
---input_rel_box_dir data/cocobu_box_relative 		#output prepro_bbox_relative_coords.py
+--input_box_dir data/bu_out_box 			#output make_bu_data.py
+--input_rel_box_dir data/bu_out_rel	 		#output prepro_bbox_relative_coords.py
 --checkpoint_path log_relation_transformerXRAY_bu_rl 
 --label_smoothing 0.0 
 --batch_size 16
