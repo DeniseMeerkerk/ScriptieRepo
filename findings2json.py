@@ -39,6 +39,8 @@ def correct_image_path_json(json_folder,json_file, json_object,server=False,imag
         for i,image in enumerate(json_object[n]['images']):
             if server:
                 json_object[n]['images'][i] = image.replace('image/train2014_resized/',image_folder) ######
+                #json_object[n]['images'][i] = image.replace('CXR','') ######
+                #json_object[n]['images'][i] = image.replace('.png','.dcm.png') ######
             else:
                 json_object[n]['images'][i] = image.replace('image/train2014_resized/',image_folder)
     output_filename= json_file.replace(".json","_correct.json")
