@@ -37,7 +37,7 @@ class DataLoader(data.Dataset):
         self.seq_per_img = opt.seq_per_img
 
         # feature related options
-        self.use_att = getattr(opt, 'use_att', True)
+        self.use_att = getattr(opt, 'use_att', False)
         self.use_box = getattr(opt, 'use_box', 0)
         self.norm_att_feat = getattr(opt, 'norm_att_feat', 0)
         self.norm_box_feat = getattr(opt, 'norm_box_feat', 0)
@@ -142,6 +142,8 @@ class DataLoader(data.Dataset):
             else:
                 tmp_fc, tmp_att,\
                     ix, tmp_wrapped = self._prefetch_process[split].get()
+            #print('test blob:', tmp_fc, tmp_att,tmp_box_coords, ix, tmp_wrapped)
+            #print('boxes_batch:', boxes_batch)
             fc_batch.append(tmp_fc)
             att_batch.append(tmp_att)
 
@@ -156,7 +158,7 @@ class DataLoader(data.Dataset):
             # record associated info as well
             info_dict = {}
             info_dict['ix'] = ix
-            info_dict['id'] = self.info['images'][ix]['id']
+            info_dict['id'] = ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path'])))
             info_dict['file_path'] = self.info['images'][ix]['file_path']
             infos.append(info_dict)
 
@@ -172,13 +174,21 @@ class DataLoader(data.Dataset):
             fc_batch, att_batch, label_batch, gts, infos = \
                 zip(*sorted(zip(fc_batch, att_batch, np.vsplit(label_batch, batch_size), gts, infos), key=lambda x: 0, reverse=True))
 
-        data['fc_feats'] = np.stack(reduce(lambda x,y:x+y, [[_]*seq_per_img for _ in fc_batch]))
+        try:
+            data['fc_feats'] = np.stack(reduce(lambda x,y:x+y, [[_]*seq_per_img for _ in fc_batch]))
+        except:
+            data['fc_feats'] = None
         # merge att_feats
-        max_att_len = max([_.shape[0] for _ in att_batch])
+        #print('att_batch',att_batch)
+        max_att_len = max([_.shape[1] for _ in att_batch])
+        #print('max_att_len',max_att_len)
         data['att_feats'] = np.zeros([len(att_batch)*seq_per_img, max_att_len, att_batch[0].shape[1]], dtype = 'float32')
         for i in range(len(att_batch)):
-            data['att_feats'][i*seq_per_img:(i+1)*seq_per_img, :att_batch[i].shape[0]] = att_batch[i]
-
+            try:
+                data['att_feats'][i*seq_per_img:(i+1)*seq_per_img, :att_batch[i].shape[0]] = att_batch[i] #[0][0] ##
+                #print(i)
+            except:
+                continue
         data['att_masks'] = np.zeros(data['att_feats'].shape[:2], dtype='float32')
         for i in range(len(att_batch)):
             data['att_masks'][i*seq_per_img:(i+1)*seq_per_img, :att_batch[i].shape[0]] = 1
@@ -200,7 +210,14 @@ class DataLoader(data.Dataset):
         if self.use_box:
             data['boxes'] = np.zeros([len(boxes_batch)*seq_per_img, max_att_len, boxes_batch[0].shape[1]], dtype = 'float32')
             for i in range(len(boxes_batch)):
-                data['boxes'][i*seq_per_img:(i+1)*seq_per_img, :boxes_batch[i].shape[0]] = boxes_batch[i]
+                #print('2:',i)
+                #print(i*seq_per_img,(i+1)*seq_per_img,0 ,boxes_batch[i].shape[0])
+                try:
+                    data['boxes'][i*seq_per_img:(i+1)*seq_per_img, :boxes_batch[i].shape[0]] = boxes_batch[i] #[:,:]  ##
+                    #print(i, boxes_batch[i].shape)
+                except:
+                    continue
+        #print('data[boxes]',data['boxes'], type(data['boxes']))
         return data
 
     # It's not coherent to make DataLoader a subclass of Dataset, but essentially, we only need to implement the following to functions,
@@ -211,25 +228,38 @@ class DataLoader(data.Dataset):
         """
         ix = index #self.split_ix[index]
         if self.use_att:
-            att_feat = np.load(os.path.join(self.input_att_dir, str(self.info['images'][ix]['id']) + '.npz'))['feat']
+            #print('hoi:',os.path.join(self.input_att_dir, str(self.info['images'][ix])))
+            att_feat_tmp = np.load(os.path.join(self.input_att_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npz'))['feat']
+            #print('att_feat',att_feat_tmp.shape)
+            att_feat_tmp = att_feat_tmp.reshape((-1,13,13,912))
+            att_feat = np.zeros((att_feat_tmp.shape[0],att_feat_tmp.shape[1],att_feat_tmp.shape[2],1024))
+            att_feat[:,:,:,:912] = att_feat_tmp
+            del att_feat_tmp
+
+            #print('att_feat reshape', att_feat)
+            att_feat = np.append(att_feat, att_feat, axis = -1)
             # Reshape to K x C
-            att_feat = att_feat.reshape(-1, att_feat.shape[-1])
+            try:
+                att_feat = att_feat.reshape(-1, att_feat.shape[-1])
+            except:
+                att_feat = np.zeros((1,1,1))
             if self.norm_att_feat:
                 att_feat = att_feat / np.linalg.norm(att_feat, 2, 1, keepdims=True)
             if self.use_box:
-                box_file = os.path.join(self.rel_bboxes_dir,str(self.info['images'][ix]['id']) + '.npy')
+                box_file = os.path.join(self.rel_bboxes_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npy')
                 box_coords = np.load(box_file)
                 areas = np.expand_dims(utils.get_box_areas(box_coords), axis=1)
 
                 box_coords_with_area = np.concatenate([box_coords, areas],axis=-1)
-                return (np.load(os.path.join(self.input_fc_dir, str(self.info['images'][ix]['id']) + '.npy')),
+                #print('before return', att_feat, box_coords)
+                return (np.load(os.path.join(self.input_fc_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npy')),
                         att_feat,
                         box_coords,
                         ix)
 
         else:
             att_feat = np.zeros((1,1,1))
-        return (np.load(os.path.join(self.input_fc_dir, str(self.info['images'][ix]['id']) + '.npy')),
+        return (np.load(os.path.join(self.input_fc_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npy')),
                 att_feat,
                 ix)
 
@@ -299,12 +329,13 @@ class BlobFetcher():
             self.reset()
 
         ix, wrapped = self._get_next_minibatch_inds()
+        #print('ix:',ix,'\nwrapped:', wrapped)
         tmp = self.split_loader.next()
+        #print('tmp:',tmp)
         if wrapped:
             self.reset()
 
         #TODO: Double-Check this is correct
         assert tmp[-1] == ix, "ix not equal"
         #assert tmp[2] == ix, "ix not equal"
-
         return tmp + [wrapped]

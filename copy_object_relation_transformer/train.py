@@ -18,7 +18,7 @@ from dataloader import *
 import eval_utils
 import misc.utils as utils
 from misc.rewards import init_scorer, get_self_critical_reward
-
+import gc
 try:
     import tensorboardX as tb
 except ImportError:
@@ -127,7 +127,8 @@ def train(opt):
 
         torch.cuda.synchronize()
         start = time.time()
-
+        #gc.collect()
+        #torch.cuda.empty_cache()
         tmp = [data['fc_feats'], data['att_feats'], data['labels'], data['masks'], data['att_masks']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
         fc_feats, att_feats, labels, masks, att_masks = tmp
@@ -138,6 +139,7 @@ def train(opt):
 
         if not sc_flag:
             if opt.use_box:
+                #print(boxes)
                 loss = crit(dp_model(fc_feats, att_feats, boxes, labels, att_masks), labels[:,1:], masks[:,1:])
             else:
                 loss = crit(dp_model(fc_feats, att_feats, labels, att_masks), labels[:,1:], masks[:,1:])
@@ -149,7 +151,7 @@ def train(opt):
                 gen_result, sample_logprobs = dp_model(fc_feats, att_feats, att_masks, opt={'sample_max':0}, mode='sample')
                 reward = get_self_critical_reward(dp_model, fc_feats, att_feats, None, att_masks, data, gen_result, opt)
 
-            loss = rl_crit(sample_logprobs, gen_result.data, torch.from_numpy(reward).float().cuda())
+            loss = rl_crit(sample_logprobs, gen_result.data, torch.from_numpy(reward).float()).cuda()
 
         loss.backward()
         utils.clip_gradient(optimizer, opt.grad_clip)

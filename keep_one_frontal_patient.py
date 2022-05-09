@@ -17,7 +17,7 @@ def obtain_json_object(json_folder, json_file):
 
 
 def main():
-    server = False # adjust accordingly
+    server = True # adjust accordingly
     
     #get paths depending on whether working on server or local.
     if server:
@@ -44,7 +44,7 @@ def main():
     images = os.listdir(image_folder)
     count = 0
     for image in images:
-        image2 = image.replace('CXR','').replace('.png', '.dcm.png')
+        image2 = image #.replace('CXR','').replace('.png', '.dcm.png')
         if image2 not in list(keepers['filename']):
             os.rename(image_folder + image, new_image_folder+image)
             count +=1
