@@ -44,6 +44,25 @@ argparser.add_argument(
     #default= '/home/denise/Documents/Vakken/Scriptie/DATA2/PNG/train2/')
     default= '/home/denise/Downloads/subset30/')
 
+argparser.add_argument(
+    '-t',
+    '--tsv_path',
+    help='path to output of tsv file',
+    default= '/home/denise/Downloads/constructed_features.tsv')
+
+argparser.add_argument(
+    '-s',
+    '--start',
+    help='at which image file to start',
+    type = int,
+    default= 0)
+
+argparser.add_argument(
+    '--slice',
+    help='size of the slice',
+    type = int,
+    default= 500)
+
 #%% crop image
 def crop_image(image,boxes,labels, obj_thresh):
     cropped_images, used_boxes = [], []
@@ -65,7 +84,7 @@ def crop_image(image,boxes,labels, obj_thresh):
             #             cv2.FONT_HERSHEY_SIMPLEX, 
             #             1e-3 * image.shape[0], 
             #             (0,255,0), 2)
-            cropped_image = image[box.ymin:box.ymax, box.xmin:box.ymax,:]
+            cropped_image = image[box.ymin:box.ymax, box.xmin:box.xmax,:] # of eerst x dan y ?
             cropped_images.append(cropped_image)
             used_boxes.append([box.xmin,box.xmax,box.ymin,box.ymax])
          
@@ -77,11 +96,11 @@ def get_features_per_box(yolov3,cropped_new_images):
     features_out = []
     
     for cropped_new_image in cropped_new_images:
-        features_layer105 = Model(inputs=yolov3.inputs,
-                             outputs=yolov3.get_layer(name="conv_105").output)
+        features_layer80 = Model(inputs=yolov3.inputs,
+                             outputs=yolov3.get_layer(name="conv_80").output)
     
     
-        features = features_layer105(tf.convert_to_tensor(cropped_new_image,dtype=np.float32))
+        features = features_layer80(tf.convert_to_tensor(cropped_new_image,dtype=np.float32))
         init_op = tf.global_variables_initializer()
     
         with tf.Session() as sess:
@@ -93,10 +112,10 @@ def get_features_per_box(yolov3,cropped_new_images):
     
 
 #%% save file like downloaded feats
-def save_like_downloaded_feats(image_id,image_w,image_h,num_boxes,used_boxes,features_out):
+def save_like_downloaded_feats(image_id,image_w,image_h,num_boxes,used_boxes,features_out,file_path="constructed_yolo_feats_.tsv"):
     used_boxes_encoded = encode_base64(used_boxes)
     features_out_encoded = encode_base64(features_out)
-    with open("constructed_yolo_feats.tsv","a") as file:
+    with open(file_path,"a") as file:
         file.write(str(image_id) + "\t" + str(image_w) + "\t" +
                    str(image_h) + "\t" + str(num_boxes) + "\t" +
                    str(used_boxes_encoded)[2:-1] + "\t" + str(features_out_encoded)[2:-1] + "\n" )
@@ -105,7 +124,7 @@ def save_like_downloaded_feats(image_id,image_w,image_h,num_boxes,used_boxes,fea
 #%% encode to base64
 def encode_base64(list_array):
     array = np.array(list_array)
-    array.reshape((-1,1)).squeeze()
+    #array.reshape((-1,1)).squeeze()
     array_bytes = base64.b64encode(array)
     return array_bytes
 
@@ -113,6 +132,8 @@ def encode_base64(list_array):
 #TODO: get list of images from folder
 def get_list_images(images_path):
     images = [f for f in os.listdir(images_path) if os.path.isfile(os.path.join(images_path, f))]
+    print(type(images))
+    images.sort()
     return images
 
 #%%
@@ -124,7 +145,11 @@ def _main_(args):
     weights_path = args.weights
     image_folder   = args.image_folder
     images_path = get_list_images(image_folder)
-    
+    print(type(images_path))
+    start = args.start
+    slice = args.slice
+    tsv_file= args.tsv_path
+    tsv_file = tsv_file.replace('.tsv', str(start) + '-' + str(start+slice) + '.tsv')
     # set some parameters
     net_h, net_w = 416, 416
     obj_thresh, nms_thresh = 0.5, 0.45
@@ -153,15 +178,16 @@ def _main_(args):
     #weight_reader.load_weights(yolov3)
     
     # preprocess the image
-    for image_path in images_path:
+    feature_list =[]
+    for image_path in images_path[start:start + slice]:
         print(image_folder + image_path)
         image = cv2.imread(image_folder + image_path)
         try:
             image_h, image_w, _ = image.shape
-            print(image_h, image_w)
+            #print(image_h, image_w)
         except:
             print(image_path + " did not contain shape???")
-            print(image)
+            #print(image)
             #break
         new_image = preprocess_input(image, net_h, net_w)
         print('preprocess done')
@@ -186,9 +212,15 @@ def _main_(args):
         # draw bounding boxes on the image using labels
         #draw_boxes(image, boxes, labels, obj_thresh)
         cropped_images, used_boxes = crop_image(image,boxes,labels, obj_thresh)
-        print('cropped done')
+        print('cropped done', used_boxes)
         # write the image with bounding boxes to file
         #cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], (image).astype('uint8')) 
+        if len(used_boxes)==0:
+            cropped_images = [image]
+            #print(image.shape)
+            new_h, new_w, _ = image.shape
+            used_boxes = [[0,new_w,0,new_h]]
+        
         cropped_new_images = []
         for cropped_image in cropped_images:
             if 0 in cropped_image.shape:
@@ -197,9 +229,14 @@ def _main_(args):
                 cropped_new_images.append(preprocess_input(cropped_image, net_h, net_w))
         print('appending images done')
         features_out = get_features_per_box(yolov3,cropped_new_images)
-        print('get features done')
-        save_like_downloaded_feats(image_path[:-4], image_w, image_h, len(used_boxes),used_boxes,features_out)
-        print('saving done \n')
+        #print('get features done',features_out)
+        #save_like_downloaded_feats(image_path[:-4], image_w, image_h, len(used_boxes),used_boxes,features_out,tsv_file)
+        #print('saving done \n', tsv_file)
+        used_boxes_encoded = encode_base64(used_boxes)
+        features_out_encoded = encode_base64(features_out)
+        feature_list.append([image_path[:-4],image_w,image_h,len(used_boxes),used_boxes_encoded,features_out_encoded])
+    features_df = pd.DataFrame(feature_list)
+    features_df.to_csv(tsv_file, sep="\t",header=False,index=False)
 
 if __name__ == '__main__':
     args = argparser.parse_args()
@@ -208,7 +245,7 @@ if __name__ == '__main__':
 
 
 
-#TODO: only png works???
+#TODO: instead of saving each line to tsv, first save in a pandas dataframe and then write whole dataframe to disk: MUCH more efficient
 
 #%% look into bounding box distribution
 '''
@@ -216,6 +253,3 @@ for n, box in enumerate(boxes):
     if np.max(box.classes) > 0:
         print(n, np.max(box.classes))
 '''
-    
-
-

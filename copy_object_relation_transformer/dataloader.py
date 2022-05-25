@@ -231,9 +231,9 @@ class DataLoader(data.Dataset):
             #print('hoi:',os.path.join(self.input_att_dir, str(self.info['images'][ix])))
             att_feat_tmp = np.load(os.path.join(self.input_att_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npz'))['feat']
             #print('att_feat',att_feat_tmp.shape)
-            att_feat_tmp = att_feat_tmp.reshape((-1,13,13,912))
+            att_feat_tmp = att_feat_tmp.reshape((-1,13,13,1024))
             att_feat = np.zeros((att_feat_tmp.shape[0],att_feat_tmp.shape[1],att_feat_tmp.shape[2],1024))
-            att_feat[:,:,:,:912] = att_feat_tmp
+            att_feat[:,:,:,:att_feat_tmp.shape[-1]] = att_feat_tmp
             del att_feat_tmp
 
             #print('att_feat reshape', att_feat)

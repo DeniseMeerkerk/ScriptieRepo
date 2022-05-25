@@ -11,7 +11,7 @@ needed as input for code from herade paper.
 #%% packages
 import os
 import json
-
+import random
 #%% adjust json file to right directory (only test for now)
 def obtain_json_object(json_folder, json_file):
     a_file = open(json_folder+json_file, "r")
@@ -82,6 +82,11 @@ def convert_json_coco_style(subset,json_folder,output_filename,image_folder, ser
                 }],
             'report_id': int(image['report_id'].split('CXR')[-1])
             })
+    if split == 'train':
+        random.shuffle(new_IU_json['images'])
+        for n in range(int(len(new_IU_json['images'])*0.9),len(new_IU_json['images'])):
+            new_IU_json['images'][n]['split'] = 'val'
+    print(new_IU_json['images'][-1]['split'])
     save_subset_jsonfile(json_folder,new_IU_json,output_filename)
     return
     
@@ -102,7 +107,7 @@ def main():
     for json_file in json_files:
         json_object = obtain_json_object(json_folder, json_file)
         json_object = correct_image_path_json(json_folder, json_file, json_object,server=server,image_folder=image_folder)
-        output_filename = json_file.replace(".json", "_likecoco.json")
+        output_filename = json_file.replace(".json", "_likecoco_val.json")
         convert_json_coco_style(json_object,json_folder,output_filename,image_folder, server=server)
     return
         

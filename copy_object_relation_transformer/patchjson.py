@@ -13,13 +13,13 @@ import numpy as np
 import json
 import os
 import pandas as pd
-
-
+import random
+random.seed(2022)
 server = True
 
 if server:
-    jsonfile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out.json'
-    rel_box_dir ='/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out10_rel'
+    jsonfile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out_subset600.json'
+    rel_box_dir ='/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out600_rel'
     file_key = 'file_path'
     subset_dir = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized/'
 else:
@@ -70,7 +70,15 @@ for image in info['images']:
         checked_images.append(image)
     else:
         continue
-        
+
+random.shuffle(checked_images)
+for n in range(int(len(checked_images)*0.9),len(checked_images)):
+    checked_images[n]['split'] = "val"
+
+#for n in range(len(checked_images)):
+#    if n%10==0:
+#        checked_images[n]['split'] = "val"
+
 info['images'] = checked_images
 print(len(checked_images))
 
@@ -78,5 +86,5 @@ print(len(checked_images))
 
 #%%
 json_string = json.dumps(info)
-with open(jsonfile.replace('.json', '_subset170.json'), 'w') as outfile:
+with open(jsonfile.replace('.json', '_subset600.json'), 'w') as outfile:
     outfile.write(json_string)

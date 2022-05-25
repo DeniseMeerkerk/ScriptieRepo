@@ -25,7 +25,10 @@ import opts
 def language_eval(dataset, preds, model_id, image_root, split):
     import sys
     sys.path.append("coco-caption")
-    annFile = 'coco-caption/annotations/captions_val2014.json'
+    #annFile = 'coco-caption/annotations/captions_val2014.json'
+    #annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out_subset600_subset600.json'
+    #annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/copyval_train_likecoco.json'
+    annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_val.json'
     from pycocotools.coco import COCO
     from misc.correct_coco_eval_cap import CorrectCOCOEvalCap
 
@@ -37,14 +40,17 @@ def language_eval(dataset, preds, model_id, image_root, split):
     cache_path = os.path.join(results_dir, model_id + '_' + split + '.json')
 
     coco = COCO(annFile)
+    #coco = COCO()
     valids = coco.getImgIds()
 
     # filter results to only those in MSCOCO validation set (will be about a third)
     preds_filt = [p for p in preds if p['image_id'] in valids]
     print('using %d/%d predictions' % (len(preds_filt), len(preds)))
-    json.dump(preds_filt, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
-
+    json.dump(preds, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
+    #print('preds',preds)
+    print('cache',cache_path)
     cocoRes = coco.loadRes(cache_path)
+    #cocoRes = coco.loadRes(annFile)
     cocoEval = CorrectCOCOEvalCap(coco, cocoRes)
     cocoEval.params['image_id'] = cocoRes.getImgIds()
     cocoEval.evaluate()

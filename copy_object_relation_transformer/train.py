@@ -127,8 +127,8 @@ def train(opt):
 
         torch.cuda.synchronize()
         start = time.time()
-        #gc.collect()
-        #torch.cuda.empty_cache()
+        gc.collect()
+        torch.cuda.empty_cache()
         tmp = [data['fc_feats'], data['att_feats'], data['labels'], data['masks'], data['att_masks']]
         tmp = [_ if _ is None else torch.from_numpy(_).cuda() for _ in tmp]
         fc_feats, att_feats, labels, masks, att_masks = tmp
