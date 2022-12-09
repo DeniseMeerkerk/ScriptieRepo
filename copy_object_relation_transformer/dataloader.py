@@ -185,7 +185,7 @@ class DataLoader(data.Dataset):
         data['att_feats'] = np.zeros([len(att_batch)*seq_per_img, max_att_len, att_batch[0].shape[1]], dtype = 'float32')
         for i in range(len(att_batch)):
             try:
-                data['att_feats'][i*seq_per_img:(i+1)*seq_per_img, :att_batch[i].shape[0]] = att_batch[i] #[0][0] ##
+                data['att_feats'][i*seq_per_img:(i+1)*seq_per_img, :att_batch[i].shape[0]] = att_batch[i] #[0][0] #W##
                 #print(i)
             except:
                 continue
@@ -228,6 +228,7 @@ class DataLoader(data.Dataset):
         """
         ix = index #self.split_ix[index]
         if self.use_att:
+            #print("image name",str(self.info['images'][ix]['file_path'])) ##
             #print('hoi:',os.path.join(self.input_att_dir, str(self.info['images'][ix])))
             att_feat_tmp = np.load(os.path.join(self.input_att_dir, ''.join(filter(str.isdigit,str(self.info['images'][ix]['file_path']))) + '.npz'))['feat']
             #print('att_feat',att_feat_tmp.shape)
@@ -242,7 +243,7 @@ class DataLoader(data.Dataset):
             try:
                 att_feat = att_feat.reshape(-1, att_feat.shape[-1])
             except:
-                att_feat = np.zeros((1,1,1))
+                att_feat = np.zeros((1,13,13,1024))
             if self.norm_att_feat:
                 att_feat = att_feat / np.linalg.norm(att_feat, 2, 1, keepdims=True)
             if self.use_box:

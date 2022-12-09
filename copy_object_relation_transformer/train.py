@@ -44,7 +44,7 @@ def train(opt):
     histories = {}
     if opt.start_from is not None:
         # open old infos and check if models are compatible
-        with open(os.path.join(opt.start_from, 'infos_'+opt.id+'.pkl')) as f:
+        with open(os.path.join(opt.start_from, 'infos_'+opt.id+'.pkl'),'rb') as f:
             infos = cPickle.load(f)
             saved_model_opt = infos['opt']
             need_be_same=["caption_model", "rnn_type", "rnn_size", "num_layers"]
@@ -52,7 +52,7 @@ def train(opt):
                 assert vars(saved_model_opt)[checkme] == vars(opt)[checkme], "Command line argument and saved model disagree on '%s' " % checkme
 
         if os.path.isfile(os.path.join(opt.start_from, 'histories_'+opt.id+'.pkl')):
-            with open(os.path.join(opt.start_from, 'histories_'+opt.id+'.pkl')) as f:
+            with open(os.path.join(opt.start_from, 'histories_'+opt.id+'.pkl'),'rb') as f:
                 histories = cPickle.load(f)
 
     iteration = infos.get('iter', 0)
@@ -139,7 +139,12 @@ def train(opt):
 
         if not sc_flag:
             if opt.use_box:
-                #print(boxes)
+                #print("fc_feats:",fc_feats.size())
+                #print("att_feats:",att_feats.size())
+                #print("boxes:",boxes.size())
+                #print("labels:",labels.size())
+                #print("att_masks:",att_masks.size())
+                #print("labels:",labels)
                 loss = crit(dp_model(fc_feats, att_feats, boxes, labels, att_masks), labels[:,1:], masks[:,1:])
             else:
                 loss = crit(dp_model(fc_feats, att_feats, labels, att_masks), labels[:,1:], masks[:,1:])
@@ -162,6 +167,7 @@ def train(opt):
         if not sc_flag:
             print("iter {} (epoch {}), train_loss = {:.3f}, time/batch = {:.3f}" \
                 .format(iteration, epoch, train_loss, end - start))
+            torch.cuda.empty_cache()
         else:
             print("iter {} (epoch {}), avg_reward = {:.3f}, time/batch = {:.3f}" \
                 .format(iteration, epoch, np.mean(reward[:,0]), end - start))

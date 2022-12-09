@@ -19,6 +19,7 @@ import cv2
 import tensorflow as tf
 from yolo3_one_file_to_detect_them_all import make_yolov3_model, WeightReader, preprocess_input, correct_yolo_boxes, do_nms, decode_netout
 import base64
+import pandas as pd
 
 #np.set_printoptions(threshold=np.nan)
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -62,6 +63,12 @@ argparser.add_argument(
     help='size of the slice',
     type = int,
     default= 500)
+
+argparser.add_argument(
+    '--no_box',
+    help='whether boxes are used(false,default) or not(true)',
+    type = bool,
+    default= False)
 
 #%% crop image
 def crop_image(image,boxes,labels, obj_thresh):
@@ -148,6 +155,7 @@ def _main_(args):
     print(type(images_path))
     start = args.start
     slice = args.slice
+    no_box = args.no_box
     tsv_file= args.tsv_path
     tsv_file = tsv_file.replace('.tsv', str(start) + '-' + str(start+slice) + '.tsv')
     # set some parameters
@@ -179,7 +187,7 @@ def _main_(args):
     
     # preprocess the image
     feature_list =[]
-    for image_path in images_path[start:start + slice]:
+    for n,image_path in enumerate(images_path[start:start + slice]):
         print(image_folder + image_path)
         image = cv2.imread(image_folder + image_path)
         try:
@@ -215,7 +223,7 @@ def _main_(args):
         print('cropped done', used_boxes)
         # write the image with bounding boxes to file
         #cv2.imwrite(image_path[:-4] + '_detected' + image_path[-4:], (image).astype('uint8')) 
-        if len(used_boxes)==0:
+        if len(used_boxes)==0 or no_box:
             cropped_images = [image]
             #print(image.shape)
             new_h, new_w, _ = image.shape
@@ -235,6 +243,9 @@ def _main_(args):
         used_boxes_encoded = encode_base64(used_boxes)
         features_out_encoded = encode_base64(features_out)
         feature_list.append([image_path[:-4],image_w,image_h,len(used_boxes),used_boxes_encoded,features_out_encoded])
+        if n%10 == 9:
+            features_df = pd.DataFrame(feature_list)
+            features_df.to_csv(tsv_file, sep="\t",header=False,index=False)
     features_df = pd.DataFrame(feature_list)
     features_df.to_csv(tsv_file, sep="\t",header=False,index=False)
 
