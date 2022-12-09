@@ -12,7 +12,7 @@ needed as input for code from herade paper.
 import os
 import json
 
-#%% adjust json file to right directory (only test for now)
+#%% adjust json file to right directory 
 def obtain_json_object(json_folder, json_file):
     a_file = open(json_folder+json_file, "r")
     json_object = json.load(a_file)
@@ -82,8 +82,24 @@ def convert_json_coco_style(subset,json_folder,output_filename,image_folder, ser
                 }],
             'report_id': int(image['report_id'].split('CXR')[-1])
             })
+    random.shuffle(new_IU_json['images'])
+    for n in range(int(len(new_IU_json['images'])*0.9),len(new_IU_json['images'])):
+        new_IU_json['images'][n]['split'] = 'val'
     save_subset_jsonfile(json_folder,new_IU_json,output_filename)
     return
+
+def combine_train_test(output_filenames,json_folder):
+    # load test & train json
+    json_test = obtain_json_object(json_folder, output_filenames[0])
+    json_train = obtain_json_object(json_folder, output_filenames[1])
+    # extract all image info from test # Add test images to train json
+    json_train["images"] = json_train["images"] + json_test["images"]
+    
+    # save new json file 
+    with open(json_folder+output_filenames[1],"w") as outfile:
+        json.dump(json_train,outfile)
+    return
+
     
 def main():
     server = True # adjust accordingly
@@ -99,11 +115,13 @@ def main():
         image_folder = '/home/denise/Documents/Vakken/Scriptie/DATA/NLMCXR_png'
     # adjust train and test json file
     json_files = ["/test.json","/train.json"]
+    output_filenames = []
     for json_file in json_files:
         json_object = obtain_json_object(json_folder, json_file)
         json_object = correct_image_path_json(json_folder, json_file, json_object,server=server,image_folder=image_folder)
-        output_filename = json_file.replace(".json", "_likecoco.json")
-        convert_json_coco_style(json_object,json_folder,output_filename,image_folder, server=server)
+        output_filenames.append(json_file.replace(".json", "_likecoco.json"))
+        convert_json_coco_style(json_object,json_folder,output_filenames[-1],image_folder, server=server)
+    combine_train_test(output_filenames,json_folder)
     return
         
         
