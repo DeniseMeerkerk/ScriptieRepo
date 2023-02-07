@@ -22,10 +22,17 @@ REPORT_DATA_PKL_FILE_TEMPLATE = '%s_%s_report_data.pkl'
 import opts
 #model_opts = opts.parse_opt()
 #use_box=True
-def language_eval(dataset, preds, model_id, image_root, split):
+def language_eval_old(dataset, preds, model_id, image_root, split):
     import sys
     sys.path.append("coco-caption")
-    annFile = 'coco-caption/annotations/captions_val2014.json'
+    if split =="val":
+        split_temp = "train"
+    else:
+        split_temp = split
+    #annFile = 'coco-caption/annotations/captions_val2014.json'
+    #annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out_subset600_subset600.json'
+    #annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/copyval_train_likecoco.json'
+    annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/test_likecoco_val.json'
     from pycocotools.coco import COCO
     from misc.correct_coco_eval_cap import CorrectCOCOEvalCap
 
@@ -37,14 +44,17 @@ def language_eval(dataset, preds, model_id, image_root, split):
     cache_path = os.path.join(results_dir, model_id + '_' + split + '.json')
 
     coco = COCO(annFile)
+    #coco = COCO()
     valids = coco.getImgIds()
 
     # filter results to only those in MSCOCO validation set (will be about a third)
     preds_filt = [p for p in preds if p['image_id'] in valids]
     print('using %d/%d predictions' % (len(preds_filt), len(preds)))
-    json.dump(preds_filt, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
-
+    json.dump(preds, open(cache_path, 'w')) # serialize to temporary json file. Sigh, COCO API...
+    #print('preds',preds)
+    print('cache',cache_path)
     cocoRes = coco.loadRes(cache_path)
+    #cocoRes = coco.loadRes(annFile)
     cocoEval = CorrectCOCOEvalCap(coco, cocoRes)
     cocoEval.params['image_id'] = cocoRes.getImgIds()
     cocoEval.evaluate()
@@ -70,6 +80,45 @@ def language_eval(dataset, preds, model_id, image_root, split):
         json.dump({'overall': out, 'imgToEval': imgToEval}, outfile)
 
     return out
+
+
+def language_eval(dataset, preds, model_id, image_root, split):
+    #get annotations
+    annFile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_val.json'
+    with open(annFile, 'r') as infile:
+        anno = json.load(infile)
+    annotations_temps = anno["annotations"]
+    annotations={}
+    for annotations_temp in annotations_temps:
+        annotations[str(annotations_temp["image_id"])]=annotations_temp["caption"]   
+    print("type anno keys:",list(annotations.keys()))
+    #use eval_metrics.py for metric results
+    import eval_metrics
+    metric_scoring = eval_metrics.Eval_Metrics()
+    imgToEval =[]
+    for pred in preds:
+        candidate = pred["caption"]
+        #link annotations to corresponding predictions based on image_id
+        print(type(pred["image_id"]))
+        reference = annotations[pred["image_id"]]
+        metric_scoring.all_metrics(reference, candidate,['METEOR',"BLEU","ROUGE"])
+        imgToEval.append(pred["image_id"])
+        
+    
+    #json.dump results & image caption(?)
+    results_dir = 'eval_results'
+    cache_path = os.path.join(results_dir, model_id + '_' + split + '.json')
+    with open(cache_path, 'w') as outfile:
+        json.dump({'overall': metric_scoring.result,
+                   'imgToEval': imgToEval}, outfile)
+    #print average results
+    for metric in metric_scoring.result.keys():
+        try:
+            print("\n"+"average " + metric + " score: ",sum(metric_scoring.result[metric])/len(metric_scoring.result[metric]))
+        except:
+            print("\n no average for " + metric)
+    
+    return metric_scoring.result
 
 def eval_split(model, crit, loader, eval_kwargs={}):
     verbose = eval_kwargs.get('verbose', True)
@@ -172,6 +221,7 @@ def eval_split(model, crit, loader, eval_kwargs={}):
 
     lang_stats = None
     if lang_eval == 1:
+        #print("predictions: ", predictions)
         lang_stats = language_eval(dataset, predictions, eval_kwargs.get('id'),
                                    eval_kwargs.get('image_root'), split)
 

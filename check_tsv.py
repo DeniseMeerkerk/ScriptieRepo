@@ -35,9 +35,9 @@ tsv_files = [file for file in files if '.tsv' in file]
 
 for n,tsv_file in enumerate(tsv_files):
     if n ==0:
-        feats = pd.read_csv(tsv_file,sep='\t', header=None)
+        feats = pd.read_csv(tsv_path+tsv_file,sep='\t', header=None)
     else:
-        temp = pd.read_csv(tsv_file,sep='\t', header=None)
+        temp = pd.read_csv(tsv_path+tsv_file,sep='\t', header=None)
         feats = feats.append(temp, ignore_index = True)
         del temp
 

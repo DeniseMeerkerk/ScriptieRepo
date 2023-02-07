@@ -56,3 +56,12 @@ python prepro_bbox_relative_coords.py --input_json /ceph/csedu-scratch/project/d
 python train.py --id relation_transformerXRAY_bu_rl --caption_model relation_transformer --input_json /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out.json  --input_fc_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_217_fc --input_att_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out4762_att --input_label_h5 /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/train_out_label.h5  --input_box_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out4762_box --input_rel_box_dir /ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_217_rel --checkpoint_path log_relation_transformerXRAY_bu_rl --label_smoothing 0.0 --batch_size 16 --learning_rate 5e-4 --num_layers 6 --input_encoding_size 512 --rnn_size 2048 --learning_rate_decay_start 0 --scheduled_sampling_start 0 --save_checkpoint_every 6000 --language_eval 1 --val_images_use 20 --self_critical_after 30 --max_epochs 60 --use_box 1
 
 ```
+# Flowchart
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```

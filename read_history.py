@@ -14,8 +14,9 @@ import numpy as np
 #%% load histories
 file_path = r"histories_first_training_all_data.pkl"
 file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/dummy_02_dec/histories_first_training_all_data.pkl"
-file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/exp_up10_02_dec/histories_first_training_all_data.pkl"
-file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/dummy_02_dec/infos_first_training_all_data-best.pkl"
+#file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/exp_up10_02_dec/histories_first_training_all_data.pkl"
+#file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/dummy_02_dec/infos_first_training_all_data-best.pkl"
+file_path =r"/home/denise/Documents/Vakken/Scriptie/ScriptieRepo/result_files/exp_no_bb_14_dec/histories_first_training_all_data.pkl"
 
 with open(file_path, "rb") as input_file:
     e = cPickle.load(input_file)
@@ -36,14 +37,15 @@ val_loss = val_loss.reindex(sorted(val_loss.columns), axis=1)
 
 
 #%% plot all loss dingen
-plt.plot(train_loss.index,train_loss[0],label="training loss", alpha=0.25)
-plt.plot(train_loss.index,train_loss['SMA30'],label="training loss moving average 30", color='tab:blue')
-plt.plot(val_loss.columns,val_loss.loc['loss'],".",label="validation loss",color="tab:orange")
+plt.plot(train_loss.index,train_loss[0],label="Training Loss", alpha=0.25)
+plt.plot(train_loss.index,train_loss['SMA30'],label="Training Loss Moving Average", color='tab:blue')
+plt.plot(val_loss.columns,val_loss.loc['loss'],".",label="Validation Loss",color="tab:orange")
 
 
-plt.xlabel("iteration")
-plt.ylabel("loss")
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
 plt.legend()
+plt.savefig(file_path.replace(".pkl",".png"),dpi=300)
 plt.show()
 
 

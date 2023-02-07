@@ -5,7 +5,7 @@ Created on Fri Mar 25 15:38:30 2022
 
 @author: denise
 
-copy input json file and remove images with missing features/boxes/attributes etc.
+copy input json file and remove images with missing features/boxes/attributes etc. mainly relative box!
 
 """
 
@@ -13,13 +13,13 @@ import numpy as np
 import json
 import os
 import pandas as pd
-
-
+import random
+random.seed(2022)
 server = True
 
 if server:
-    jsonfile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_likecoco_out.json'
-    rel_box_dir ='/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out10_rel'
+    jsonfile = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/json/train_hopefully_final_out.json'
+    rel_box_dir ='/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/bu_out_all_rel'
     file_key = 'file_path'
     subset_dir = '/ceph/csedu-scratch/project/dmeerkerk/UI_Xray/images/images_normalized/'
 else:
@@ -70,7 +70,24 @@ for image in info['images']:
         checked_images.append(image)
     else:
         continue
-        
+
+#only add validation images if no validation is present yet
+splits = [x["split"] for x in checked_images]
+print("\n train: \t", splits.count("train")/len(checked_images)*100,"%")
+print("\n val: \t", splits.count("val")/len(checked_images)*100,"%")
+print("\n test: \t", splits.count("test")/len(checked_images)*100,"%")
+
+split_types = set(splits)
+if "val" not in split_types:
+    random.shuffle(checked_images)
+    for n in range(int(len(checked_images)*0.9),len(checked_images)):
+        if check_images[n]["split"] != "test": # dont use test set as validation
+            checked_images[n]['split'] = "val"
+
+#for n in range(len(checked_images)):
+#    if n%10==0:
+#        checked_images[n]['split'] = "val"
+
 info['images'] = checked_images
 print(len(checked_images))
 
@@ -78,5 +95,5 @@ print(len(checked_images))
 
 #%%
 json_string = json.dumps(info)
-with open(jsonfile.replace('.json', '_subset170.json'), 'w') as outfile:
+with open(jsonfile.replace('.json', '_all_patched_met_elena.json'), 'w') as outfile:
     outfile.write(json_string)

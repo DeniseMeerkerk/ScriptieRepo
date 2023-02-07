@@ -61,6 +61,8 @@ parser.add_argument('--dump_json', type=int, default=1,
                 help='Dump json with predictions into vis folder? (1=yes,0=no)')
 parser.add_argument('--dump_path', type=int, default=0,
                 help='Write image paths along with predictions into vis json? (1=yes,0=no)')
+parser.add_argument('--experiment', type=str, default="",
+                help='give human readable name for the experiment which is evaluated now.')
 
 # Sampling options
 parser.add_argument('--sample_max', type=int, default=1,
@@ -114,7 +116,7 @@ parser.add_argument('--verbose_loss', type=int, default=0,
 opt = parser.parse_args()
 
 # Load infos
-with open(opt.infos_path) as f:
+with open(opt.infos_path,"rb") as f:
     infos = cPickle.load(f)
 
 # override and collect parameters
@@ -178,4 +180,4 @@ if lang_stats:
 
 if opt.dump_json == 1:
     # dump the json
-    json.dump(split_predictions, open('vis/vis.json', 'w'))
+    json.dump(split_predictions, open('vis/vis'+opt.experiment+'.json', 'w'))

@@ -114,3 +114,4 @@ with open(input_json2.replace(".json","up"+str(upsample+1)+".json"), "w") as out
 json1_out = json.dumps(json1b)
 with open(input_json1.replace(".json","up"+str(upsample+1)+".json"), "w") as output_file:
      output_file.write(json1_out)
+
